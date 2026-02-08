@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data files (keep raw data out of git if large)
+data/raw/*.csv
+data/raw/*.xlsx
+!data/raw/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# LaTeX
+*.aux
+*.log
+*.bbl
+*.blg
+*.toc
+*.out
+*.synctex.gz
+paper/*.pdf
+
+# Figures (regenerated from code)
+figures/*.png
+figures/*.jpg
+!figures/.gitkeep
+
+# Environment
+.env
+*.env
