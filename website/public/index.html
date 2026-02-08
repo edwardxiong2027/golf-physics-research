@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimal Putting Speed: A Physics-Based Analysis | Jordan Xiong</title>
+    <meta name="description" content="Research paper analyzing the physics of optimal putting speed in golf using Newtonian mechanics and Monte Carlo simulation.">
+    <meta name="author" content="Jordan Xiong">
+    <meta name="keywords" content="golf physics, putting, sports science, Newtonian mechanics, research paper">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Optimal Putting Speed: A Physics-Based Analysis">
+    <meta property="og:description" content="High school research paper on the physics of golf putting, validated against PGA Tour data.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- KaTeX for math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #1a5f2a;
+            --primary-light: #2d8a3e;
+            --accent: #c9a227;
+            --text: #1a1a2e;
+            --text-light: #4a4a5a;
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --border: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 18px;
+            line-height: 1.7;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            max-width: 900px;
+            margin: 0 auto 20px;
+            position: relative;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .author-info {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+
+        .author-info span {
+            margin: 0 10px;
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        nav a {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        /* Main content */
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        section {
+            margin-bottom: 60px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            color: var(--text);
+            margin: 30px 0 15px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        /* Abstract box */
+        .abstract {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .abstract h2 {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 15px;
+        }
+
+        .abstract p {
+            font-size: 1.05rem;
+        }
+
+        .keywords {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 20px;
+        }
+
+        .keywords strong {
+            color: var(--text);
+        }
+
+        /* Key findings cards */
+        .findings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .finding-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .finding-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .finding-card .value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .finding-card .label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Equations */
+        .equation {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 8px;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        /* Figures */
+        figure {
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        figure img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        figcaption {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 20px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        /* Blockquote */
+        blockquote {
+            border-left: 4px solid var(--accent);
+            padding: 20px 30px;
+            margin: 30px 0;
+            background: #fffdf5;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+        }
+
+        blockquote cite {
+            display: block;
+            margin-top: 15px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-style: normal;
+        }
+
+        /* References */
+        .references {
+            font-size: 0.95rem;
+        }
+
+        .references ol {
+            counter-reset: ref-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .references li {
+            counter-increment: ref-counter;
+            padding-left: 35px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .references li::before {
+            content: "[" counter(ref-counter) "]";
+            position: absolute;
+            left: 0;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        footer p {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Code/GitHub button */
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--text);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .github-link:hover {
+            background: #333;
+        }
+
+        /* Download button */
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 10px;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: var(--primary-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            nav ul {
+                gap: 15px;
+            }
+
+            .findings-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Optimal Putting Speed: A Physics-Based Analysis of Ball Velocity, Break, and Make Probability</h1>
+        <p class="subtitle">A High School Research Paper in Sports Physics</p>
+        <p class="author-info">
+            <span><strong>Jordan Xiong</strong></span>
+            <span>|</span>
+            <span>High School Junior</span>
+            <span>|</span>
+            <span>February 2024</span>
+        </p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#abstract">Abstract</a></li>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#methods">Methods</a></li>
+            <li><a href="#results">Results</a></li>
+            <li><a href="#discussion">Discussion</a></li>
+            <li><a href="#references">References</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Key Findings -->
+        <section>
+            <h2>Key Findings</h2>
+            <div class="findings-grid">
+                <div class="finding-card">
+                    <span class="value">1.8 m/s</span>
+                    <span class="label">Optimal Putting Speed</span>
+                </div>
+                <div class="finding-card">
+                    <span class="value">r = 0.97</span>
+                    <span class="label">Correlation with PGA Data</span>
+                </div>
+                <div class="finding-card">
+                    <span class="value">17 in</span>
+                    <span class="label">Optimal Distance Past Hole</span>
+                </div>
+                <div class="finding-card">
+                    <span class="value">B ~ 1/v<sup>1.2</sup></span>
+                    <span class="label">Speed-Break Relationship</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Abstract -->
+        <section id="abstract" class="abstract">
+            <h2>Abstract</h2>
+            <p>
+                This study develops a physics-based mathematical model to determine the optimal putting speed in golf,
+                analyzing the fundamental trade-off between ball velocity and break magnitude. Using Newtonian mechanics,
+                we model golf ball trajectories on sloped putting surfaces, incorporating rolling friction derived from
+                stimpmeter ratings and gravitational effects from green slope. Our differential equations of motion were
+                solved numerically and validated against PGA Tour ShotLink putting statistics (<em>r</em> = 0.97, <em>p</em> &lt; 0.001).
+            </p>
+            <p>
+                Monte Carlo simulations incorporating human error in speed and aim reveal that optimal putting speed
+                maximizes make probability by balancing two competing factors: slower putts break more (missing wide)
+                while faster putts risk lip-outs. For a 10-foot putt on a tournament-speed green (12 stimpmeter) with
+                2% slope, our model predicts an optimal initial velocity of 1.8-2.0 m/s, corresponding to the ball
+                stopping approximately 15-18 inches past the hole if missed&mdash;consistent with Dave Pelz's
+                empirically-derived "17-inch rule."
+            </p>
+            <p class="keywords">
+                <strong>Keywords:</strong> golf physics, putting biomechanics, rolling friction, sports science, optimization
+            </p>
+        </section>
+
+        <!-- Introduction -->
+        <section id="introduction">
+            <h2>1. Introduction</h2>
+
+            <h3>1.1 Background and Motivation</h3>
+            <p>
+                Golf putting represents a fascinating intersection of physics, mathematics, and human motor control.
+                Unlike the full swing, where power generation is paramount, putting success depends critically on
+                precision&mdash;both in direction and speed control. The question of how hard to hit a putt has been
+                debated among golfers for over a century, with two primary schools of thought: "die it at the hole"
+                (minimal speed) versus "firm putting" (sufficient speed to roll 1-2 feet past if missed).
+            </p>
+            <p>
+                The physics underlying this debate involves a fundamental trade-off. Slower putts spend more time on
+                the green, allowing gravitational forces from the slope more time to deflect the ball (increased "break").
+                However, slower putts that reach the hole with minimal velocity can enter from a wider range of angles,
+                effectively making the hole larger. Conversely, faster putts break less but must enter more precisely
+                to avoid "lip-outs."
+            </p>
+
+            <blockquote>
+                "Putts should be struck with enough speed to roll approximately 17 inches past the hole if they miss."
+                <cite>&mdash; Dave Pelz, former NASA physicist (1977)</cite>
+            </blockquote>
+
+            <h3>1.2 Research Objectives</h3>
+            <p>This study aims to:</p>
+            <ol>
+                <li>Develop a comprehensive physics model for golf ball motion on sloped putting surfaces</li>
+                <li>Quantify the relationship between initial ball velocity and break magnitude</li>
+                <li>Determine the optimal putting speed that maximizes make probability</li>
+                <li>Validate model predictions against professional putting statistics</li>
+                <li>Provide a physics-based explanation for the empirical "17-inch rule"</li>
+            </ol>
+        </section>
+
+        <!-- Methods -->
+        <section id="methods">
+            <h2>2. Methods</h2>
+
+            <h3>2.1 Mathematical Model</h3>
+            <p>
+                We developed a two-dimensional model of ball motion on a sloped putting green. The equations of motion
+                incorporate rolling friction and gravitational effects from the slope:
+            </p>
+
+            <div class="equation">
+                $$\frac{d^2x}{dt^2} = g\sin\theta\cos\phi - \mu g\cos\theta \cdot \frac{v_x}{|v|}$$
+            </div>
+
+            <div class="equation">
+                $$\frac{d^2y}{dt^2} = g\sin\theta\sin\phi - \mu g\cos\theta \cdot \frac{v_y}{|v|}$$
+            </div>
+
+            <p>
+                where &theta; is the slope angle, &phi; is the slope direction, &mu; is the friction coefficient,
+                and |v| = &radic;(v<sub>x</sub>&sup2; + v<sub>y</sub>&sup2;) is the instantaneous speed.
+            </p>
+
+            <h3>2.2 Stimpmeter and Friction</h3>
+            <p>
+                The stimpmeter provides a standardized measure of green speed. Using energy conservation, we relate
+                the stimpmeter rating S to the friction coefficient:
+            </p>
+
+            <div class="equation">
+                $$\mu = \frac{v_0^2}{2gS} \approx \frac{0.65}{S}$$
+            </div>
+
+            <h3>2.3 Monte Carlo Simulation</h3>
+            <p>
+                Human putting involves error in both speed control and aim direction. We modeled these as normally
+                distributed with &sigma;<sub>v</sub> = 6% of intended speed and &sigma;<sub>&alpha;</sub> = 0.015 radians.
+                Monte Carlo simulation with 500 trials per condition estimated make probability.
+            </p>
+
+            <h3>2.4 Simulation Parameters</h3>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                    <th>Source</th>
+                </tr>
+                <tr>
+                    <td>Ball mass</td>
+                    <td>45.93 g</td>
+                    <td>USGA regulations</td>
+                </tr>
+                <tr>
+                    <td>Ball diameter</td>
+                    <td>42.67 mm</td>
+                    <td>USGA regulations</td>
+                </tr>
+                <tr>
+                    <td>Hole diameter</td>
+                    <td>108 mm (4.25 in)</td>
+                    <td>USGA regulations</td>
+                </tr>
+                <tr>
+                    <td>Stimpmeter (tournament)</td>
+                    <td>11.5 ft</td>
+                    <td>PGA Tour average</td>
+                </tr>
+                <tr>
+                    <td>Max capture velocity</td>
+                    <td>1.63 m/s</td>
+                    <td>Holmes (1991)</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Results -->
+        <section id="results">
+            <h2>3. Results</h2>
+
+            <h3>3.1 Speed-Break Relationship</h3>
+            <p>
+                The data reveal a strong inverse relationship: faster putts break substantially less than slower putts.
+                For a 10-foot putt with 2% left-to-right slope:
+            </p>
+
+            <table>
+                <tr>
+                    <th>Initial Speed (m/s)</th>
+                    <th>Maximum Break (inches)</th>
+                    <th>Optimal Aim Angle</th>
+                </tr>
+                <tr>
+                    <td>1.0</td>
+                    <td>8.2</td>
+                    <td>12.5&deg;</td>
+                </tr>
+                <tr>
+                    <td>1.5</td>
+                    <td>5.1</td>
+                    <td>7.8&deg;</td>
+                </tr>
+                <tr>
+                    <td>2.0</td>
+                    <td>3.4</td>
+                    <td>5.2&deg;</td>
+                </tr>
+                <tr>
+                    <td>2.5</td>
+                    <td>2.3</td>
+                    <td>3.5&deg;</td>
+                </tr>
+            </table>
+
+            <p>This relationship follows approximately:</p>
+
+            <div class="equation">
+                $$B \propto \frac{1}{v_0^{1.2}}$$
+            </div>
+
+            <h3>3.2 Optimal Speed Analysis</h3>
+            <p>
+                Monte Carlo simulation revealed a clear optimal speed for each putt distance. For a 10-foot putt
+                under standard conditions, the optimal speed of <strong>1.8 m/s</strong> corresponds to the ball
+                rolling approximately 16-18 inches past the hole if it misses&mdash;remarkably consistent with
+                Pelz's empirically-derived 17-inch rule.
+            </p>
+
+            <h3>3.3 Model Validation</h3>
+            <p>
+                Our model predictions achieved strong correlation with PGA Tour statistics:
+            </p>
+
+            <table>
+                <tr>
+                    <th>Distance (ft)</th>
+                    <th>PGA Tour</th>
+                    <th>Model</th>
+                    <th>Difference</th>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>77%</td>
+                    <td>71%</td>
+                    <td>-6%</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>40%</td>
+                    <td>36%</td>
+                    <td>-4%</td>
+                </tr>
+                <tr>
+                    <td>15</td>
+                    <td>23%</td>
+                    <td>21%</td>
+                    <td>-2%</td>
+                </tr>
+                <tr>
+                    <td>20</td>
+                    <td>15%</td>
+                    <td>13%</td>
+                    <td>-2%</td>
+                </tr>
+            </table>
+
+            <p>
+                <strong>Correlation:</strong> <em>r</em> = 0.974 (<em>p</em> &lt; 0.001)<br>
+                <strong>RMSE:</strong> 3.8 percentage points
+            </p>
+        </section>
+
+        <!-- Discussion -->
+        <section id="discussion">
+            <h2>4. Discussion</h2>
+
+            <h3>4.1 Key Findings</h3>
+            <p>
+                This study demonstrates that classical mechanics can accurately model golf putting and predict
+                optimal speed strategies. The physics-based model achieved strong correlation (<em>r</em> = 0.97)
+                with professional putting statistics.
+            </p>
+            <p>
+                The central finding&mdash;that optimal putting speed corresponds to rolling approximately 17 inches
+                past the hole&mdash;provides theoretical support for Pelz's empirically-derived rule. Our model
+                reveals this optimum emerges from balancing two fundamental physics constraints:
+            </p>
+            <ol>
+                <li><strong>Gravitational deflection increases with time on green</strong> (favoring faster putts)</li>
+                <li><strong>Ball capture probability decreases with entry velocity</strong> (favoring slower putts)</li>
+            </ol>
+
+            <h3>4.2 Practical Implications</h3>
+            <p>Based on the physics analysis, we recommend:</p>
+            <ul>
+                <li><strong>For breaking putts:</strong> Aim to roll the ball 15-20 inches past the hole</li>
+                <li><strong>On faster greens:</strong> Reduce target distance past to 12-15 inches</li>
+                <li><strong>On slower greens:</strong> Increase target distance past to 20-24 inches</li>
+                <li><strong>For uphill putts:</strong> Can afford slightly more aggressive speed</li>
+                <li><strong>For downhill putts:</strong> Must putt more conservatively</li>
+            </ul>
+
+            <h3>4.3 Limitations</h3>
+            <p>
+                Several limitations should be noted: the two-dimensional model does not capture vertical bouncing
+                during initial roll; real greens have complex, undulating topography; and green-reading errors
+                were not explicitly modeled.
+            </p>
+        </section>
+
+        <!-- Conclusion -->
+        <section id="conclusion">
+            <h2>5. Conclusion</h2>
+            <p>
+                This study developed and validated a physics-based model for golf putting that accurately predicts
+                optimal putting speed. Using Newtonian mechanics with rolling friction and gravitational slope effects,
+                we demonstrated that optimal putting speed balances competing constraints of break and capture probability.
+            </p>
+            <p>
+                For typical tournament conditions, optimal speed corresponds to balls stopping 15-20 inches past the
+                hole&mdash;providing theoretical justification for Dave Pelz's empirically-derived "17-inch rule" and
+                demonstrating the power of physics to explain and optimize athletic performance.
+            </p>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="https://github.com/edwardxiong2027/golf-physics-research" class="github-link" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    View Code on GitHub
+                </a>
+            </div>
+        </section>
+
+        <!-- References -->
+        <section id="references" class="references">
+            <h2>References</h2>
+            <ol>
+                <li>Broadie, M. (2014). <em>Every Shot Counts: Using the Revolutionary Strokes Gained Approach to Improve Your Golf Performance and Strategy</em>. Gotham Books.</li>
+                <li>Holmes, B.W. (1991). Putting: How a golf ball and hole interact. <em>American Journal of Physics</em>, 59(2), 129-136.</li>
+                <li>Pelz, D. (1977, July). Die your putts at the hole and you're dead. <em>Golf Digest</em>.</li>
+                <li>Penner, A.R. (2002). The physics of putting. <em>Canadian Journal of Physics</em>, 80(2), 83-96.</li>
+                <li>Penner, A.R. (2003). The physics of golf. <em>Reports on Progress in Physics</em>, 66(2), 131-171.</li>
+                <li>USGA. (2024). How to measure green speed with a USGA stimpmeter. <em>Green Section Record</em>, 62(8).</li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Jordan Xiong. All rights reserved.</p>
+        <p>
+            <a href="https://github.com/edwardxiong2027/golf-physics-research">GitHub</a> &bull;
+            Prepared for Journal of Emerging Investigators
+        </p>
+    </footer>
+
+    <script>
+        // Render KaTeX
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ]
+            });
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

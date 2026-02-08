@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "research-papers-2024"
+  },
+  "targets": {
+    "research-papers-2024": {
+      "hosting": {
+        "golf-physics-research": [
+          "golf-physics-research"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
