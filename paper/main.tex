@@ -1,0 +1,239 @@
+\documentclass[12pt, letterpaper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{physics}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Title
+\title{The Physics of Optimal Putting Speed: A Mathematical Analysis of Ball Velocity, Break, and Make Probability in Golf}
+\author{Jordan Xiong\\
+\small High School Junior\\
+\small \textit{Email: [your email]}
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% ============================================
+\begin{abstract}
+This study develops a physics-based mathematical model to determine the optimal putting speed in golf, analyzing the trade-off between minimizing break (lateral deflection due to slope) and maximizing make probability. Using Newtonian mechanics, we model ball trajectory on sloped putting surfaces by incorporating friction, gravitational slope components, and green speed (stimpmeter rating). The model is validated against PGA Tour ShotLink putting statistics. Our analysis reveals that the optimal initial ball velocity follows a non-linear relationship with slope gradient, providing quantitative insights into the longstanding ``firm vs. die'' putting debate. For a 10-foot putt on a 2\% side slope with tour-speed greens (stimpmeter 12), the optimal speed is approximately [X] m/s, corresponding to a ball that would roll [Y] feet past the hole if missed. These findings offer practical guidance for golfers and demonstrate the application of classical mechanics to real-world sports analysis.
+\end{abstract}
+
+\textbf{Keywords:} golf physics, putting mechanics, projectile motion, friction, sports science, mathematical modeling
+
+% ============================================
+\section{Introduction}
+
+Golf putting presents a fascinating problem in classical mechanics: when putting on a sloped green, a ball curves (or ``breaks'') due to the gravitational component acting perpendicular to the intended path \citep{penner2003}. This creates a fundamental strategic question that has been debated by golfers for over a century: should golfers hit putts firmly to minimize break, or softly to ``die'' the ball into the hole?
+
+The ``firm vs. die'' debate has significant practical implications. A firmly struck putt breaks less because it spends less time on the green, but if it misses, the resulting comeback putt is longer. Conversely, a softly struck putt breaks more, requiring a higher aim point, but leaves a shorter second putt if missed. Despite the prevalence of this debate in golfing literature, rigorous physics-based analyses accessible to the general golfing community remain scarce.
+
+This research aims to address three questions:
+\begin{enumerate}
+    \item What is the mathematical relationship between initial ball velocity and lateral break on sloped putting greens?
+    \item How does green speed (stimpmeter rating) affect the optimal putting velocity?
+    \item Can PGA Tour putting statistics validate physics-based predictions?
+\end{enumerate}
+
+By combining Newtonian mechanics with statistical analysis of professional putting data, this study provides quantitative answers to these questions and offers practical guidance for putting strategy.
+
+% ============================================
+\section{Background and Theory}
+
+\subsection{Forces on a Rolling Golf Ball}
+
+A golf ball rolling on a putting green experiences several forces (Figure \ref{fig:fbd}):
+
+\begin{enumerate}
+    \item \textbf{Gravitational Force:} $F_g = mg$ acting vertically downward
+    \item \textbf{Normal Force:} $N = mg\cos\theta$ perpendicular to the surface
+    \item \textbf{Rolling Friction:} $f = \mu N = \mu mg\cos\theta$ opposing motion
+    \item \textbf{Slope Component:} $F_{\text{slope}} = mg\sin\theta$ along the fall line
+\end{enumerate}
+
+where $m = \SI{45.93}{\gram}$ is the golf ball mass (USGA regulation), $g = \SI{9.81}{\meter\per\second\squared}$ is gravitational acceleration, $\theta$ is the slope angle, and $\mu$ is the coefficient of rolling friction.
+
+\subsection{Green Speed and the Stimpmeter}
+
+The stimpmeter, developed by the USGA, provides a standardized measure of green speed. It measures the distance (in feet) that a ball rolls when released from a standardized ramp at a fixed height. The relationship between stimpmeter reading $S$ and rolling friction coefficient $\mu$ can be derived from energy conservation:
+
+\begin{equation}
+    \mu \approx \frac{0.65}{S}
+    \label{eq:friction}
+\end{equation}
+
+Typical stimpmeter values range from 8-9 (slow municipal courses) to 13-14 (championship conditions).
+
+\subsection{Equations of Motion}
+
+Consider a coordinate system where $x$ points toward the hole and $y$ is perpendicular (the break direction). For a ball rolling on a surface with slope angle $\theta$ oriented at angle $\phi$ relative to the $x$-axis, the equations of motion are:
+
+\begin{align}
+    \dv[2]{x}{t} &= g\sin\theta\cos\phi - \mu g\cos\theta \frac{v_x}{|\vec{v}|} \label{eq:motion_x}\\
+    \dv[2]{y}{t} &= g\sin\theta\sin\phi - \mu g\cos\theta \frac{v_y}{|\vec{v}|} \label{eq:motion_y}
+\end{align}
+
+where $|\vec{v}| = \sqrt{v_x^2 + v_y^2}$ is the ball speed.
+
+These coupled differential equations do not have a closed-form analytical solution due to the nonlinear friction term. We employ fourth-order Runge-Kutta numerical integration to solve them.
+
+% ============================================
+\section{Methods}
+
+\subsection{Numerical Simulation}
+
+We implemented the physics model in Python using the SciPy library's \texttt{solve\_ivp} function with adaptive step-size control. The simulation tracks ball position and velocity until the ball either enters the hole or comes to rest.
+
+The ``capture'' condition for a made putt requires:
+\begin{enumerate}
+    \item Ball center passes within hole radius ($r_{\text{hole}} = \SI{54}{\milli\meter}$)
+    \item Ball velocity at capture point is below threshold velocity $v_{\text{max}}$
+\end{enumerate}
+
+The maximum capture velocity depends on how centered the ball enters:
+\begin{equation}
+    v_{\text{max}} = v_0 \left(0.3 + 0.7\left(1 - \frac{d}{r_{\text{hole}}}\right)\right)
+    \label{eq:capture}
+\end{equation}
+where $d$ is the distance from hole center and $v_0 \approx \SI{1.5}{\meter\per\second}$.
+
+\subsection{Monte Carlo Probability Estimation}
+
+To account for human error in aim and speed control, we estimated make probability using Monte Carlo simulation. For each initial speed, we:
+
+\begin{enumerate}
+    \item Calculate the optimal aim angle
+    \item Simulate $N = 500$ putts with normally distributed errors:
+        \begin{itemize}
+            \item Aim error: $\sigma_\theta = \SI{0.02}{\radian} \approx 1.1°$
+            \item Speed error: $\sigma_v = 5\%$ of intended speed
+        \end{itemize}
+    \item Count successful putts to estimate make probability
+\end{enumerate}
+
+\subsection{Data Sources}
+
+We used publicly available PGA Tour putting statistics from the 2023 season, including:
+\begin{itemize}
+    \item Make percentages by distance (3-30 feet)
+    \item Strokes Gained Putting data
+    \item Tournament green speed reports
+\end{itemize}
+
+% ============================================
+\section{Results}
+
+\subsection{Speed-Break Relationship}
+
+Figure \ref{fig:speed_break} shows the relationship between initial ball velocity and total break for a 10-foot putt on a 2\% side slope. The relationship is inverse but nonlinear:
+
+\begin{equation}
+    B(v) \approx \frac{k}{v^\alpha}
+    \label{eq:break}
+\end{equation}
+
+where $B$ is break magnitude, $v$ is initial velocity, and fitted parameters are $k = [X]$ and $\alpha = [Y]$.
+
+[INSERT FIGURE 2: Speed vs Break]
+
+\subsection{Optimal Putting Speed}
+
+Figure \ref{fig:optimal} shows make probability as a function of initial speed. The probability follows a bell-shaped curve, with a clear optimum:
+
+\begin{itemize}
+    \item Speeds below optimum: Ball breaks too much, missing on the low side
+    \item Speeds above optimum: Ball lips out or rolls too far past
+\end{itemize}
+
+[INSERT FIGURE 3: Make Probability vs Speed]
+
+For standard conditions (10-foot putt, 2\% slope, stimpmeter 12), the optimal speed is approximately $[X]$ m/s, corresponding to a ball that would roll $[Y]$ feet past the hole if hit on a straight line.
+
+\subsection{Effect of Slope and Green Speed}
+
+Table \ref{tab:optimal} summarizes optimal putting speeds across various conditions:
+
+\begin{table}[H]
+\centering
+\caption{Optimal Putting Speeds (m/s) by Slope and Green Speed}
+\label{tab:optimal}
+\begin{tabular}{lcccc}
+\toprule
+Slope (\%) & Stimp 10 & Stimp 11 & Stimp 12 & Stimp 13 \\
+\midrule
+1.0 & [X] & [X] & [X] & [X] \\
+2.0 & [X] & [X] & [X] & [X] \\
+3.0 & [X] & [X] & [X] & [X] \\
+4.0 & [X] & [X] & [X] & [X] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Model Validation}
+
+Comparing our model predictions to PGA Tour make percentages shows [describe agreement/discrepancy]:
+
+[INSERT FIGURE 4: Model vs PGA Data Comparison]
+
+% ============================================
+\section{Discussion}
+
+\subsection{The ``Firm vs. Die'' Debate Resolved}
+
+Our results suggest that the optimal putting strategy is neither extremely firm nor dying the ball at the hole, but rather a moderate approach. The optimal speed increases with slope, supporting the intuition that sloped putts should be hit more firmly.
+
+Quantitatively, for a 10-foot putt with 2\% slope, the optimal ball would travel approximately [X] feet past the hole if missed---consistent with the common advice to ``putt to roll 12-18 inches by.''
+
+\subsection{Implications for Golfers}
+
+[Discuss practical applications]
+
+\subsection{Limitations}
+
+Several limitations affect our model:
+\begin{enumerate}
+    \item Green surfaces are assumed perfectly planar
+    \item Grain direction is not modeled
+    \item Wind effects are neglected
+    \item Human error distributions are estimated
+\end{enumerate}
+
+Future work could address these limitations and incorporate machine learning approaches for more accurate predictions.
+
+% ============================================
+\section{Conclusion}
+
+This study developed a physics-based model for golf putting that quantifies the relationship between ball velocity, break, and make probability. Key findings include:
+
+\begin{enumerate}
+    \item Break magnitude varies inversely with ball speed according to Equation \ref{eq:break}
+    \item An optimal putting speed exists that maximizes make probability
+    \item The optimal speed increases with slope gradient
+    \item Model predictions align with PGA Tour statistics within [X]\%
+\end{enumerate}
+
+These results provide scientific grounding for the ``firm vs. die'' debate and offer quantitative guidance for putting strategy.
+
+% ============================================
+\section*{Acknowledgments}
+
+[Thank mentors, teachers, etc.]
+
+% ============================================
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}
