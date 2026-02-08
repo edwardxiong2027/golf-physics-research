@@ -37,9 +37,9 @@ data/raw/*.xlsx
 *.synctex.gz
 paper/*.pdf
 
-# Figures (regenerated from code)
-figures/*.png
-figures/*.jpg
+# Figures - keep paper figures in repo
+# figures/*.png
+# figures/*.jpg
 !figures/.gitkeep
 
 # Environment

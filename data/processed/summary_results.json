@@ -1,0 +1,16 @@
+{
+  "analysis_date": "2026-02-08T13:35:57.957667",
+  "conditions": {
+    "stimpmeter": 12.0,
+    "slope_percent": 2.0,
+    "distance_ft": 10
+  },
+  "results": {
+    "optimal_speed_mps": 1.9142857142857144,
+    "max_make_probability": 0.5416666666666666,
+    "speed_break_fit_k": 4.563200197644443,
+    "speed_break_fit_alpha": -1.8448288112924869,
+    "validation_correlation": 0.9785845822774437,
+    "validation_mae": 0.062166666666666676
+  }
+}
